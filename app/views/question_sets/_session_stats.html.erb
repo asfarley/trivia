@@ -1,0 +1,6 @@
+<% if session_total > 0 %>
+  <span class="stats-pill">
+    <%= session_correct %> / <%= session_total %>
+    (<%= (session_correct.to_f / session_total * 100).round %>%)
+  </span>
+<% end %>

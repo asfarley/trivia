@@ -1,0 +1,8 @@
+<% content_for :title, "Edit: #{@question_set.title}" %>
+<h1>Edit: <%= @question_set.title %></h1>
+<%= render "form", question_set: @question_set %>
+
+<hr>
+<%= button_to "Delete this set", @question_set, method: :delete,
+    data: { turbo_confirm: "Delete \"#{@question_set.title}\"? This cannot be undone." },
+    class: "btn btn-danger" %>

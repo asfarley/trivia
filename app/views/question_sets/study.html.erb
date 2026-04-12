@@ -1,0 +1,20 @@
+<% content_for :title, "Study: #{@question_set.title}" %>
+
+<div class="study-header">
+  <h1><%= @question_set.title %></h1>
+  <% if user_signed_in? %>
+    <div id="session-stats" class="session-stats">
+      <%= render "session_stats", session_correct: @session_correct, session_total: @session_total %>
+    </div>
+  <% end %>
+</div>
+
+<div id="answer-feedback"></div>
+
+<% if @question %>
+  <div id="question-card">
+    <%= render "study_question", question: @question, question_set: @question_set %>
+  </div>
+<% else %>
+  <p class="muted">This set has no questions yet. <% if user_signed_in? %><a href="<%= question_set_questions_path(@question_set) %>">Add some.</a><% end %></p>
+<% end %>

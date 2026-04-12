@@ -1,0 +1,21 @@
+<%= turbo_stream.replace "answer-feedback" do %>
+  <div class="feedback <%= @last_correct ? "correct" : "incorrect" %>">
+    <% if @last_correct %>
+      <strong>Correct!</strong>
+    <% else %>
+      <strong>Incorrect.</strong> The answer was: <em><%= @last_answer %></em>
+    <% end %>
+  </div>
+<% end %>
+
+<%= turbo_stream.replace "question-card" do %>
+  <div id="question-card">
+    <%= render "study_question", question: @question, question_set: @question_set %>
+  </div>
+<% end %>
+
+<% if user_signed_in? %>
+  <%= turbo_stream.replace "session-stats" do %>
+    <%= render "session_stats", session_correct: @session_correct, session_total: @session_total %>
+  <% end %>
+<% end %>

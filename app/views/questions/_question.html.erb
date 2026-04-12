@@ -1,0 +1,14 @@
+<%= turbo_frame_tag "question_#{question.id}" do %>
+  <div class="question-row">
+    <%= form_with model: [ question_set, question ] do |f| %>
+      <%= f.text_area :body, placeholder: "Question", rows: 2, class: "question-field" %>
+      <%= f.text_field :answer, placeholder: "Answer", class: "answer-field" %>
+      <%= f.submit "Save", class: "btn btn-sm" %>
+    <% end %>
+    <%= button_to "Delete",
+        question_set_question_path(question_set, question),
+        method: :delete,
+        data: { turbo_confirm: "Delete this question?" },
+        class: "btn btn-sm btn-danger" %>
+  </div>
+<% end %>

@@ -1,0 +1,7 @@
+<%= turbo_stream.append "questions-list" do %>
+  <%= render @question, question_set: @question_set %>
+<% end %>
+
+<%= turbo_stream.replace "new_question_form" do %>
+  <%= render "form", question: Question.new, question_set: @question_set %>
+<% end %>

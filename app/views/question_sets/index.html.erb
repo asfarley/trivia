@@ -1,0 +1,27 @@
+<% content_for :title, "My Sets" %>
+
+<div class="page-header">
+  <h1>My Sets</h1>
+  <a href="<%= new_question_set_path %>" class="btn btn-primary">+ New Set</a>
+</div>
+
+<% if @question_sets.any? %>
+  <ul class="set-list">
+    <% @question_sets.each do |qs| %>
+      <li>
+        <div class="set-info">
+          <a href="<%= question_set_path(qs) %>"><%= qs.title %></a>
+          <span class="badge badge-<%= qs.visibility %>"><%= qs.visibility %></span>
+          <span class="muted"><%= qs.questions.size %> questions</span>
+        </div>
+        <div class="set-actions">
+          <a href="<%= study_question_set_path(qs) %>" class="btn btn-sm">Study</a>
+          <a href="<%= question_set_questions_path(qs) %>" class="btn btn-sm">Edit Questions</a>
+          <a href="<%= edit_question_set_path(qs) %>" class="btn btn-sm">Settings</a>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="muted">No question sets yet. <a href="<%= new_question_set_path %>">Create one.</a></p>
+<% end %>

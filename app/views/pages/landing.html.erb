@@ -1,0 +1,28 @@
+<div class="landing">
+  <h1>Recall</h1>
+  <p class="tagline">Memorize anything with spaced repetition practice.</p>
+
+  <% if @featured_sets.any? %>
+    <h2>Featured Sets</h2>
+    <ul class="set-list">
+      <% @featured_sets.each do |qs| %>
+        <li>
+          <a href="<%= study_question_set_path(qs) %>"><%= qs.title %></a>
+          <% if qs.description.present? %>
+            <span class="desc"><%= qs.description %></span>
+          <% end %>
+          <span class="count"><%= qs.questions.size %> questions</span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="muted">No featured sets yet.</p>
+  <% end %>
+
+  <% unless user_signed_in? %>
+    <div class="cta">
+      <a href="<%= new_user_registration_path %>" class="btn btn-primary">Create an account</a>
+      <a href="<%= new_user_session_path %>" class="btn">Sign in</a>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,14 @@
+<% content_for :title, "Edit Questions: #{@question_set.title}" %>
+
+<div class="page-header">
+  <h1>Questions: <%= @question_set.title %></h1>
+  <a href="<%= question_set_path(@question_set) %>" class="btn">Done</a>
+</div>
+
+<div id="questions-list">
+  <%= render @question_set.questions, question_set: @question_set %>
+</div>
+
+<div id="new_question_form">
+  <%= render "form", question: Question.new, question_set: @question_set %>
+</div>

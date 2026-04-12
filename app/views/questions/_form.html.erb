@@ -1,0 +1,13 @@
+<div class="new-question-form">
+  <h3>Add Question</h3>
+  <%= form_with model: [ question_set, question ], id: "new_question_form" do |f| %>
+    <% if question.errors.any? %>
+      <div class="errors">
+        <% question.errors.full_messages.each do |msg| %><p><%= msg %></p><% end %>
+      </div>
+    <% end %>
+    <%= f.text_area :body, placeholder: "Question", rows: 2, class: "question-field" %>
+    <%= f.text_field :answer, placeholder: "Answer", class: "answer-field" %>
+    <%= f.submit "+ Add", class: "btn btn-primary" %>
+  <% end %>
+</div>

@@ -1,0 +1,39 @@
+<% content_for :title, @question_set.title %>
+
+<div class="page-header">
+  <h1><%= @question_set.title %></h1>
+  <div>
+    <a href="<%= study_question_set_path(@question_set) %>" class="btn btn-primary">Study</a>
+    <% if user_signed_in? && @question_set.user == current_user %>
+      <a href="<%= question_set_questions_path(@question_set) %>" class="btn">Edit Questions</a>
+      <a href="<%= edit_question_set_path(@question_set) %>" class="btn">Settings</a>
+    <% end %>
+  </div>
+</div>
+
+<% if @question_set.description.present? %>
+  <p class="desc"><%= @question_set.description %></p>
+<% end %>
+
+<p class="muted">
+  <%= @questions.size %> questions &middot;
+  Looseness: <%= @question_set.looseness.humanize %>
+</p>
+
+<% if user_signed_in? && @questions.any? %>
+  <h2>Your Accuracy</h2>
+  <table class="accuracy-table">
+    <thead>
+      <tr><th>Question</th><th>All-time</th><th>Last <%= Question::ROLLING_DAYS %> days</th></tr>
+    </thead>
+    <tbody>
+      <% @questions.each do |q| %>
+        <tr>
+          <td><%= q.body %></td>
+          <td><%= format_accuracy(q.accuracy(current_user)) %></td>
+          <td><%= format_accuracy(q.accuracy(current_user, rolling: true)) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
