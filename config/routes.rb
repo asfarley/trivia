@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   root "pages#landing"
 
   resources :question_sets do
+    collection do
+      get  :import
+      post :import
+    end
     member do
       get  :study
       post :check_answer

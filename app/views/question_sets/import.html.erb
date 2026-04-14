@@ -1,0 +1,90 @@
+<% content_for :title, "Import Question Set" %>
+
+<div class="page-header">
+  <h1>Import Question Set</h1>
+  <a href="<%= question_sets_path %>" class="btn">Cancel</a>
+</div>
+
+<% if @errors&.any? %>
+  <div class="errors">
+    <% @errors.each do |e| %><p><%= e %></p><% end %>
+  </div>
+<% end %>
+
+<%= form_tag import_question_sets_path, multipart: true do %>
+  <div class="field">
+    <label>Paste JSON</label>
+    <textarea name="json_text" rows="18" class="json-input" placeholder='{"title": "...", "questions": [...]}'><%= @json_text %></textarea>
+  </div>
+
+  <p class="muted import-or">— or —</p>
+
+  <div class="field">
+    <label>Upload a .json file</label>
+    <input type="file" name="json_file" accept=".json,application/json">
+  </div>
+
+  <%= submit_tag "Import", class: "btn btn-primary" %>
+<% end %>
+
+<hr>
+
+<div class="json-format-docs">
+  <h2>JSON Format</h2>
+  <pre class="code-block"><%= <<~JSON.strip
+    {
+      "title": "World Capitals",
+      "description": "Optional description of the set.",
+      "looseness": "case_insensitive",
+      "questions": [
+        { "question": "What is the capital of France?", "answer": "Paris" },
+        { "question": "What is the capital of Japan?",  "answer": "Tokyo" }
+      ]
+    }
+  JSON
+  %></pre>
+
+  <h3>Fields</h3>
+  <table class="accuracy-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>title</code></td><td>string</td><td>yes</td><td>Name of the question set</td></tr>
+      <tr><td><code>description</code></td><td>string</td><td>no</td><td>Short summary shown on the set page</td></tr>
+      <tr><td><code>looseness</code></td><td>string</td><td>no</td><td>Answer-matching strictness (see below). Defaults to <code>case_insensitive</code></td></tr>
+      <tr><td><code>questions</code></td><td>array</td><td>yes</td><td>Non-empty list of question objects</td></tr>
+      <tr><td><code>questions[].question</code></td><td>string</td><td>yes</td><td>The prompt shown to the user. Alias: <code>body</code></td></tr>
+      <tr><td><code>questions[].answer</code></td><td>string</td><td>yes</td><td>The expected answer</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Looseness values</h3>
+  <table class="accuracy-table">
+    <thead><tr><th>Value</th><th>Behaviour</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td><code>exact</code></td><td>Character-for-character match</td><td>Codes, symbols, syntax</td></tr>
+      <tr><td><code>case_insensitive</code></td><td>Ignores capitalisation</td><td>Most single-word or short answers</td></tr>
+      <tr><td><code>fuzzy</code></td><td>Ignores case, punctuation, and whitespace differences; treats <code>42</code> and <code>42.0</code> as equal</td><td>Sentences, dates, numbers</td></tr>
+      <tr><td><code>very_fuzzy</code></td><td>Everything above plus allows up to 3 character spelling mistakes (Levenshtein)</td><td>Names, long answers, tricky spelling</td></tr>
+      <tr><td><code>numeric_approximate</code></td><td>Parses numbers from both answers (stripping currency symbols and word multipliers like trillion/billion/million/k) and accepts within 5% relative error. Falls back to exact normalised match.</td><td>Quantities, estimates, statistics, financial figures</td></tr>
+    </tbody>
+  </table>
+
+  <h3>LLM prompt suggestion</h3>
+  <p class="muted">You can ask another AI model to generate a question set with this prompt:</p>
+  <pre class="code-block">Generate a question set about [TOPIC] as a JSON object with this exact structure:
+
+{
+  "title": "...",
+  "description": "...",
+  "looseness": "case_insensitive",
+  "questions": [
+    { "question": "...", "answer": "..." }
+  ]
+}
+
+Rules:
+- Include 10–20 questions.
+- Answers should be short (a word, a number, a date, or a brief phrase).
+- Use looseness "very_fuzzy" if answers involve tricky spelling or proper nouns.
+- Output only the raw JSON — no explanation, no markdown fences.</pre>
+</div>

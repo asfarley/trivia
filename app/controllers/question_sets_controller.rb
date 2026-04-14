@@ -1,5 +1,5 @@
 class QuestionSetsController < ApplicationController
-  before_action :authenticate_user!, only: [ :index, :new, :create, :edit, :update, :destroy, :pin ]
+  before_action :authenticate_user!, only: [ :index, :new, :create, :edit, :update, :destroy, :pin, :import ]
   before_action :set_question_set, only: [ :show, :edit, :update, :destroy, :study, :check_answer, :pin ]
   before_action :require_owner!, only: [ :edit, :update, :destroy ]
   before_action :require_admin!, only: [ :pin ]
@@ -73,6 +73,26 @@ class QuestionSetsController < ApplicationController
     end
   end
 
+  def import
+    return unless request.post?
+
+    json_text = if params[:json_file].present?
+      params[:json_file].read
+    else
+      params[:json_text].to_s.strip
+    end
+
+    @question_set, @errors = build_from_json(json_text)
+
+    if @errors.empty? && @question_set.save
+      redirect_to question_set_questions_path(@question_set),
+        notice: "Imported \"#{@question_set.title}\" with #{@question_set.questions.size} questions."
+    else
+      @json_text = json_text
+      render :import, status: :unprocessable_entity
+    end
+  end
+
   def pin
     new_visibility = @question_set.pinned? ? :listed : :pinned
     @question_set.update!(visibility: new_visibility)
@@ -91,6 +111,47 @@ class QuestionSetsController < ApplicationController
 
   def require_admin!
     redirect_to root_path, alert: "Not authorized." unless current_user.admin?
+  end
+
+  VALID_LOOSENESS = QuestionSet.loosenesses.keys.freeze
+
+  def build_from_json(raw)
+    errors = []
+    data   = JSON.parse(raw)
+
+    title = data["title"].to_s.strip
+    errors << "title is required" if title.blank?
+
+    raw_questions = data["questions"]
+    unless raw_questions.is_a?(Array) && raw_questions.any?
+      errors << "questions must be a non-empty array"
+    end
+
+    looseness = data["looseness"].to_s.strip
+    looseness = "case_insensitive" unless VALID_LOOSENESS.include?(looseness)
+
+    return [ nil, errors ] if errors.any?
+
+    qs = current_user.question_sets.build(
+      title: title,
+      description: data["description"].to_s.strip.presence,
+      looseness: looseness,
+      visibility: :draft
+    )
+
+    raw_questions.each.with_index(1) do |q, pos|
+      body   = (q["question"] || q["body"]).to_s.strip
+      answer = q["answer"].to_s.strip
+      if body.blank? || answer.blank?
+        errors << "question #{pos}: both \"question\" and \"answer\" are required"
+        next
+      end
+      qs.questions.build(body: body, answer: answer, position: pos)
+    end
+
+    [ qs, errors ]
+  rescue JSON::ParserError => e
+    [ nil, [ "invalid JSON: #{e.message}" ] ]
   end
 
   def question_set_params

@@ -127,3 +127,11 @@ main { max-width: 780px; margin: 2rem auto; padding: 0 1rem; }
 .desc  { color: var(--muted); font-size: 0.9rem; }
 .count { color: var(--muted); font-size: 0.85rem; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+/* Import */
+.json-input { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: monospace; font-size: 0.85rem; resize: vertical; }
+.import-or  { text-align: center; margin: 0.5rem 0; }
+.code-block { background: #f1f5f9; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; font-size: 0.82rem; overflow-x: auto; white-space: pre; font-family: monospace; }
+.json-format-docs h2 { margin-top: 0; }
+.json-format-docs h3 { margin-top: 1.5rem; }
+code { background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.875em; font-family: monospace; }

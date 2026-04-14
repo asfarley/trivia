@@ -15,7 +15,8 @@ class Question < ApplicationRecord
     when "case_insensitive" then submitted.downcase == correct_answer.downcase
     when "fuzzy"            then normalize(submitted) == normalize(correct_answer) ||
                                  numeric_match?(submitted, correct_answer)
-    when "very_fuzzy"       then fuzzy_match?(submitted, correct_answer)
+    when "very_fuzzy"            then fuzzy_match?(submitted, correct_answer)
+    when "numeric_approximate"   then approximate_numeric_match?(submitted, correct_answer)
     else false
     end
   end
@@ -36,6 +37,41 @@ class Question < ApplicationRecord
        .gsub(/[^a-z0-9\s]/, "")
        .gsub(/\s+/, " ")
        .strip
+  end
+
+  # Ordered longest-first so "trillion" matches before bare "t"
+  MULTIPLIERS = [
+    [ "trillion", 1e12 ], [ "billion", 1e9 ], [ "million", 1e6 ],
+    [ "thousand", 1e3  ], [ "hundred", 1e2 ],
+    [ "t",        1e12 ], [ "b",       1e9 ], [ "m",       1e6 ],
+    [ "k",        1e3  ]
+  ].freeze
+  APPROXIMATE_TOLERANCE = 0.05   # 5% relative error
+
+  def parse_magnitude(str)
+    s = str.gsub(/[$£€¥₹₩₽¢,\s]/, "").downcase
+    mult = 1.0
+    MULTIPLIERS.each do |suffix, factor|
+      if s.end_with?(suffix)
+        s    = s.chomp(suffix)
+        mult = factor
+        break
+      end
+    end
+    Float(s) * mult
+  rescue ArgumentError, TypeError
+    nil
+  end
+
+  def approximate_numeric_match?(submitted, correct)
+    # Also accept an exact normalized match as a fallback
+    return true if normalize(submitted) == normalize(correct)
+    a = parse_magnitude(submitted)
+    b = parse_magnitude(correct)
+    return false if a.nil? || b.nil?
+    denominator = [ a.abs, b.abs ].max
+    return a == b if denominator.zero?   # both zero
+    (a - b).abs / denominator <= APPROXIMATE_TOLERANCE
   end
 
   def numeric_match?(a, b)

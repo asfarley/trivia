@@ -1,4 +1,4 @@
-<%= turbo_stream.replace "answer-feedback" do %>
+<%= turbo_stream.update "answer-feedback" do %>
   <div class="feedback <%= @last_correct ? "correct" : "incorrect" %>">
     <% if @last_correct %>
       <strong>Correct!</strong>
@@ -15,7 +15,7 @@
 <% end %>
 
 <% if user_signed_in? %>
-  <%= turbo_stream.replace "session-stats" do %>
+  <%= turbo_stream.update "session-stats" do %>
     <%= render "session_stats", session_correct: @session_correct, session_total: @session_total %>
   <% end %>
 <% end %>
