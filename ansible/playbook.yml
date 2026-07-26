@@ -1,0 +1,25 @@
+---
+- name: Provision trivia.asfarley.com
+  hosts: production
+  become: true
+
+  roles:
+    - base          # system packages
+    - deploy_user   # create the 'deploy' OS user
+    - rbenv         # rbenv + Ruby 3.4.2 for the deploy user
+    - nginx         # Nginx reverse proxy (HTTP config; certbot adds SSL)
+    - certbot       # Let's Encrypt TLS certificate
+    - app_dirs      # Capistrano shared dirs + .env file
+    - sudoers       # allow deploy user to restart puma via sudo
+    - puma_service  # systemd unit for Puma (enabled, not started yet)
+
+  post_tasks:
+    - name: Restart Puma to apply any configuration changes
+      systemd:
+        name: puma
+        state: restarted
+      # Only restart if the app has been deployed (current/ symlink exists).
+      # On a brand new server before the first cap deploy this directory
+      # won't exist yet and the restart would fail.
+      when: ansible_facts['service_mgr'] == 'systemd'
+      failed_when: false

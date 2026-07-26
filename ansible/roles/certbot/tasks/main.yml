@@ -1,0 +1,31 @@
+---
+- name: Install Certbot and Nginx plugin
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+# Always run certbot --nginx so it (re)configures Nginx with SSL after every
+# provision — including when the Nginx template has just overwritten the config.
+# --keep-until-expiring skips cert renewal when the existing cert is still valid,
+# but certbot still re-applies the Nginx SSL configuration regardless.
+- name: Obtain or reinstall Let's Encrypt certificate and configure Nginx for HTTPS
+  command: >
+    certbot --nginx
+    -d {{ domain }}
+    --non-interactive
+    --agree-tos
+    --email {{ certbot_email }}
+    --redirect
+    --keep-until-expiring
+  register: certbot_result
+  changed_when: "'no action taken' not in certbot_result.stdout | lower"
+
+# The certbot package installs a systemd timer for auto-renewal.
+# Verify it is active.
+- name: Ensure certbot renewal timer is enabled
+  service:
+    name: certbot.timer
+    state: started
+    enabled: yes

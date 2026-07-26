@@ -1,0 +1,26 @@
+[Unit]
+Description=Puma HTTP Server for Trivia
+After=network.target
+
+[Service]
+Type=simple
+User={{ deploy_user }}
+Group={{ deploy_user }}
+WorkingDirectory={{ deploy_to }}/current
+
+# Load RAILS_MASTER_KEY, PUMA_BIND, RAILS_ENV, etc.
+EnvironmentFile={{ deploy_to }}/.env
+
+# Ensure rbenv shims and bin are on PATH so 'bundle' resolves correctly.
+Environment=PATH={{ rbenv_root }}/shims:{{ rbenv_root }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=RBENV_ROOT={{ rbenv_root }}
+
+ExecStart={{ rbenv_root }}/bin/rbenv exec bundle exec puma -C config/puma.rb
+ExecReload=/bin/kill -USR1 $MAINPID
+
+TimeoutStopSec=10
+Restart=on-failure
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

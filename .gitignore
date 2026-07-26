@@ -35,3 +35,6 @@
 
 
 /.credentials/*
+
+# Ansible Vault password file (if used instead of --ask-vault-pass)
+/ansible/.vault_pass

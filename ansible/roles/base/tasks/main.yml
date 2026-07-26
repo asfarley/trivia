@@ -1,0 +1,27 @@
+---
+- name: Update apt cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: safe
+    cache_valid_time: 3600
+
+- name: Install system build dependencies
+  apt:
+    name:
+      - acl              # required for Ansible become_user with unprivileged users
+      - build-essential
+      - git
+      - curl
+      - libssl-dev
+      - libreadline-dev
+      - zlib1g-dev
+      - libsqlite3-dev
+      - libyaml-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - libffi-dev
+      - libgmp-dev
+      - autoconf
+      - bison
+      - pkg-config
+    state: present

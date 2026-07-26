@@ -1,0 +1,24 @@
+---
+- name: Create Capistrano shared directory tree
+  file:
+    path: "{{ deploy_to }}/shared/{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  loop:
+    - storage
+    - log
+    - tmp/pids
+    - tmp/cache
+    - tmp/sockets
+    - public/system
+
+- name: Write .env file with production environment variables
+  template:
+    src: trivia.env.j2
+    dest: "{{ deploy_to }}/.env"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+  notify: restart puma

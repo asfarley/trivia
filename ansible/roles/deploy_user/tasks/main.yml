@@ -1,0 +1,43 @@
+---
+- name: Create deploy group
+  group:
+    name: "{{ deploy_user }}"
+    state: present
+
+- name: Create deploy user
+  user:
+    name: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    shell: /bin/bash
+    home: /home/{{ deploy_user }}
+    create_home: yes
+    state: present
+
+# Nginx runs as www-data and must traverse /home/deploy to reach the
+# Unix socket. o+x gives execute (directory traverse) without exposing
+# the directory listing.
+- name: Make deploy home directory traversable by www-data
+  file:
+    path: /home/{{ deploy_user }}
+    mode: "0711"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+
+- name: Ensure .ssh directory exists for deploy user
+  file:
+    path: /home/{{ deploy_user }}/.ssh
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0700"
+
+# Reuse the same authorized key that EC2 uses for the ubuntu user,
+# so the same .credentials/trivia.pem works for both users.
+- name: Copy ubuntu authorized_keys to deploy user
+  copy:
+    src: /home/ubuntu/.ssh/authorized_keys
+    dest: /home/{{ deploy_user }}/.ssh/authorized_keys
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+    remote_src: yes

@@ -1,0 +1,7 @@
+---
+- name: restart puma
+  systemd:
+    name: puma
+    state: restarted
+  # Puma may not be running yet on a first provision — ignore if so.
+  ignore_errors: yes

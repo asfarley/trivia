@@ -1,0 +1,68 @@
+---
+- name: Clone rbenv
+  become_user: "{{ deploy_user }}"
+  git:
+    repo: https://github.com/rbenv/rbenv.git
+    dest: "{{ rbenv_root }}"
+    update: yes
+
+- name: Clone ruby-build plugin
+  become_user: "{{ deploy_user }}"
+  git:
+    repo: https://github.com/rbenv/ruby-build.git
+    dest: "{{ rbenv_root }}/plugins/ruby-build"
+    update: yes
+
+- name: Add rbenv init to .bashrc
+  become_user: "{{ deploy_user }}"
+  blockinfile:
+    path: /home/{{ deploy_user }}/.bashrc
+    marker: "# {mark} RBENV"
+    block: |
+      export RBENV_ROOT="{{ rbenv_root }}"
+      export PATH="{{ rbenv_root }}/bin:$PATH"
+      eval "$(rbenv init -)"
+
+- name: Add rbenv init to .profile
+  become_user: "{{ deploy_user }}"
+  blockinfile:
+    path: /home/{{ deploy_user }}/.profile
+    create: yes
+    marker: "# {mark} RBENV"
+    block: |
+      export RBENV_ROOT="{{ rbenv_root }}"
+      export PATH="{{ rbenv_root }}/bin:$PATH"
+      eval "$(rbenv init -)"
+
+- name: Check if Ruby {{ ruby_version }} is already installed
+  become_user: "{{ deploy_user }}"
+  stat:
+    path: "{{ rbenv_root }}/versions/{{ ruby_version }}/bin/ruby"
+  register: ruby_bin
+
+- name: Install Ruby {{ ruby_version }} (this takes several minutes)
+  become_user: "{{ deploy_user }}"
+  shell: >
+    RBENV_ROOT={{ rbenv_root }}
+    {{ rbenv_root }}/bin/rbenv install {{ ruby_version }}
+  when: not ruby_bin.stat.exists
+  args:
+    executable: /bin/bash
+
+- name: Set global Ruby version
+  become_user: "{{ deploy_user }}"
+  shell: >
+    RBENV_ROOT={{ rbenv_root }}
+    {{ rbenv_root }}/bin/rbenv global {{ ruby_version }}
+  args:
+    executable: /bin/bash
+
+- name: Install bundler {{ bundler_version }}
+  become_user: "{{ deploy_user }}"
+  shell: >
+    RBENV_ROOT={{ rbenv_root }}
+    PATH={{ rbenv_root }}/bin:{{ rbenv_root }}/shims:$PATH
+    gem install bundler -v {{ bundler_version }} --no-document
+  args:
+    executable: /bin/bash
+  changed_when: false

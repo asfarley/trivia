@@ -1,0 +1,10 @@
+---
+- name: Allow deploy user to manage puma service without a password
+  copy:
+    dest: /etc/sudoers.d/deploy-puma
+    content: |
+      deploy ALL=(ALL) NOPASSWD: /bin/systemctl start puma, /bin/systemctl stop puma, /bin/systemctl restart puma, /bin/systemctl status puma
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s

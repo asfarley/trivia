@@ -32,12 +32,6 @@ gem "solid_cable"
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
-gem "kamal", require: false
-
-# Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
-gem "thruster", require: false
-
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
@@ -58,6 +52,16 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Capistrano deployment
+  gem "capistrano",        "~> 3.19", require: false
+  gem "capistrano-rbenv",  "~> 2.2",  require: false
+  gem "capistrano-bundler","~> 2.1",  require: false
+  gem "capistrano-rails",  "~> 1.6",  require: false
+
+  # ED25519 SSH key support for Net::SSH (required by .credentials/trivia.pem)
+  gem "ed25519",        ">= 1.2", "< 2.0", require: false
+  gem "bcrypt_pbkdf",   ">= 1.0", "< 2.0", require: false
 end
 
 group :test do

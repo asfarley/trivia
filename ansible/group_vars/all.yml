@@ -1,0 +1,8 @@
+app_name:     trivia
+deploy_user:  deploy
+deploy_to:    /home/deploy/apps/trivia
+ruby_version: "3.4.2"
+bundler_version: "4.0.10"
+rbenv_root:   /home/deploy/.rbenv
+domain:       trivia.asfarley.com
+certbot_email: alexander.s.farley@gmail.com
